@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="pt-br" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestor de Receitas</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #212529; }
+        .tab-pane { padding: 20px; background-color: #2b3035; border-radius: 0 0 10px 10px; border: 1px solid #495057; border-top: none; }
+        .nav-tabs .nav-link.active { background-color: #2b3035; color: #fff; border-color: #495057 #495057 #2b3035; }
+        .card-login { max-width: 400px; margin: 100px auto; }
+    </style>
+</head>
+<body class="container py-4">
+
+    <div id="tela-login" class="d-none">
+        <div class="card card-login bg-dark border-secondary text-light">
+            <div class="card-header text-center">
+                <h3>Login</h3>
+            </div>
+            <div class="card-body">
+                <form id="form-login">
+                    <div class="mb-3">
+                        <label>Usuário</label>
+                        <input type="text" id="login-user" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label>Senha</label>
+                        <input type="password" id="login-pass" class="form-control" required>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">Entrar</button>
+                        <button type="button" class="btn btn-outline-secondary" onclick="registrar()">Criar Conta</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="tela-app" class="d-none">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="text-light">Gestor Financeiro</h2>
+            <button class="btn btn-outline-danger btn-sm" onclick="logout()">Sair do Sistema</button>
+        </div>
+
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item"><button class="nav-link active" data-bs-target="#ingredientes" data-bs-toggle="tab">Ingredientes</button></li>
+            <li class="nav-item"><button class="nav-link" data-bs-target="#receitas" data-bs-toggle="tab">Receitas</button></li>
+            <li class="nav-item"><button class="nav-link" data-bs-target="#custos" data-bs-toggle="tab">Custos Op.</button></li>
+            <li class="nav-item"><button class="nav-link" data-bs-target="#vendas" data-bs-toggle="tab">Vendas</button></li>
+            <li class="nav-item"><button class="nav-link" data-bs-target="#relatorios" data-bs-toggle="tab">Relatórios</button></li>
+        </ul>
+
+        <div class="tab-content">
+            
+            <div class="tab-pane fade show active" id="ingredientes">
+                <div class="row">
+                    <div class="col-md-4">
+                        <h5>Novo Ingrediente</h5>
+                        <form id="form-ingrediente">
+                            <input type="text" id="ing-nome" class="form-control mb-2" placeholder="Nome" required>
+                            <input type="number" id="ing-custo" class="form-control mb-2" placeholder="Custo Unitário" step="0.01" required>
+                            <input type="text" id="ing-unidade" class="form-control mb-2" placeholder="Unidade (kg, L)" required>
+                            <button type="submit" class="btn btn-primary w-100">Adicionar</button>
+                        </form>
+                    </div>
+                    <div class="col-md-8">
+                        <table class="table table-striped table-dark">
+                            <thead><tr><th>Nome</th><th>Custo</th><th>Unid</th><th>Ação</th></tr></thead>
+                            <tbody id="tabela-ingredientes"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="receitas">
+                <div class="row">
+                    <div class="col-md-5">
+                        <h5 class="mb-3">Criar Receita</h5>
+                        <input type="text" id="rec-nome" class="form-control mb-2" placeholder="Nome da Receita">
+                        <div class="row g-2 mb-2">
+                            <div class="col"><input type="number" id="rec-rendimento" class="form-control" placeholder="Rende (Qtd)"></div>
+                            <div class="col"><input type="number" id="rec-margem" class="form-control" placeholder="Margem %"></div>
+                        </div>
+                        
+                        <hr class="border-secondary">
+                        <h6>Ingredientes</h6>
+                        <div class="input-group mb-2">
+                            <select id="rec-select-ing" class="form-select"></select>
+                            <input type="number" id="rec-qtd-ing" class="form-control" placeholder="Qtd" style="max-width: 80px;">
+                            <button class="btn btn-secondary" onclick="addIngToRecipeList()">+</button>
+                        </div>
+                        <ul id="lista-temp-ing" class="list-group mb-2 small"></ul>
+
+                        <h6>Custos Fixos (Embalagem, etc)</h6>
+                        <div class="input-group mb-2">
+                            <input type="text" id="rec-fixo-nome" class="form-control" placeholder="Descrição">
+                            <input type="number" id="rec-fixo-custo" class="form-control" placeholder="R$" style="max-width: 80px;">
+                            <button class="btn btn-secondary" onclick="addCostToRecipeList()">+</button>
+                        </div>
+                        <ul id="lista-temp-custos" class="list-group mb-3 small"></ul>
+
+                        <button class="btn btn-success w-100" onclick="salvarReceita()">Salvar Receita</button>
+                    </div>
+                    <div class="col-md-7">
+                        <h5>Receitas Salvas</h5>
+                        <table class="table table-striped table-dark table-hover">
+                            <thead><tr><th>Nome</th><th>Preço Venda</th><th>Ações</th></tr></thead>
+                            <tbody id="tabela-receitas"></tbody>
+                        </table>
+                        <div id="detalhes-receita" class="alert alert-info mt-3 d-none"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="custos">
+                <div class="row">
+                    <div class="col-md-4">
+                        <h5 class="mb-3">Lançar Despesa</h5>
+                        <form id="form-custo-op">
+                            <label>Descrição</label>
+                            <input type="text" id="op-nome" class="form-control mb-2" placeholder="Ex: Conta de Luz" required>
+                            <label>Valor</label>
+                            <input type="number" id="op-valor" class="form-control mb-2" placeholder="R$" step="0.01" required>
+                            <label>Data</label>
+                            <input type="date" id="op-data" class="form-control mb-3" required>
+                            <button type="submit" class="btn btn-warning w-100">Registrar</button>
+                        </form>
+                    </div>
+                    <div class="col-md-8">
+                        <table class="table table-striped table-dark">
+                            <thead><tr><th>Data</th><th>Descrição</th><th>Valor</th><th>Ação</th></tr></thead>
+                            <tbody id="tabela-custos-op"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="vendas">
+                <div class="row">
+                    <div class="col-md-4">
+                        <h5>Nova Venda</h5>
+                        <label class="small">Receita</label>
+                        <select id="venda-receita" class="form-select mb-2"></select>
+                        
+                        <label class="small">Quantidade</label>
+                        <input type="number" id="venda-qtd" class="form-control mb-2">
+                        
+                        <label class="small">Pagamento</label>
+                        <select id="venda-pagto" class="form-select mb-2">
+                            <option>Dinheiro</option><option>Pix</option><option>Crédito</option><option>Débito</option>
+                        </select>
+                        
+                        <div class="row g-2 mb-2">
+                            <div class="col">
+                                <label class="small">Taxa Entrega (+)</label>
+                                <input type="number" id="venda-taxa-entrega" class="form-control" value="0">
+                            </div>
+                            <div class="col">
+                                <label class="small">Custo Motoboy (-)</label>
+                                <input type="number" id="venda-custo-entrega" class="form-control" value="0">
+                            </div>
+                        </div>
+                        
+                        <label class="small">Data</label>
+                        <input type="date" id="venda-data" class="form-control mb-3">
+                        
+                        <button class="btn btn-success w-100" onclick="registrarVenda()">Confirmar Venda</button>
+                    </div>
+                    <div class="col-md-8">
+                        <table class="table table-striped table-dark table-sm">
+                            <thead><tr><th>Data</th><th>Receita</th><th>Qtd</th><th>Lucro Líquido</th></tr></thead>
+                            <tbody id="tabela-vendas"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="relatorios">
+                <div class="row g-2 align-items-end mb-3">
+                    <div class="col-auto"><label>Início</label><input type="date" id="rel-inicio" class="form-control"></div>
+                    <div class="col-auto"><label>Fim</label><input type="date" id="rel-fim" class="form-control"></div>
+                    <div class="col-auto"><button class="btn btn-info" onclick="gerarRelatorio()">Gerar Relatório</button></div>
+                </div>
+                <pre id="relatorio-texto" class="bg-dark text-light p-3 border border-secondary rounded" style="min-height: 300px; font-family: 'Courier New', monospace;"></pre>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
