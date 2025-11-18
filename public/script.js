@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:3000/api';
+const API_URL = '/api';
 
 // Variáveis temporárias para criação de receita
 let tempIngredients = [];
@@ -397,4 +397,5 @@ async function gerarRelatorio() {
     });
 
     document.getElementById('relatorio-texto').innerText = texto;
+
 }
