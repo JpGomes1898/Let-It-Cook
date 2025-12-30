@@ -74,7 +74,7 @@ Se você quiser rodar este projeto no seu computador para desenvolvimento:
 Pré-requisitos: Ter Node.js e PostgreSQL instalados.
 
 Clone o repositório:
-git clone https://github.com/seu-usuario/gestor-receitas.git
+git clone https://github.com/JpGomes1898/Let-It-Cook.git
 
 Instale as dependências:
 npm install
