@@ -1,20 +1,16 @@
 const API_URL = '/api';
 
-// Variáveis temporárias para criação de receita
 let tempIngredients = [];
 let tempFixedCosts = [];
 let recipesCache = [];
 
-// --- INICIALIZAÇÃO ---
 document.addEventListener('DOMContentLoaded', async () => {
-    // Configura datas iniciais
     const hoje = new Date().toISOString().split('T')[0];
     document.getElementById('op-data').value = hoje;
     document.getElementById('venda-data').value = hoje;
     document.getElementById('rel-inicio').value = hoje;
     document.getElementById('rel-fim').value = hoje;
 
-    // Verifica se está logado
     const res = await fetch(`${API_URL}/check-auth`);
     const data = await res.json();
     
@@ -25,7 +21,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
-// --- CONTROLE DE TELAS (LOGIN vs APP) ---
 function mostrarLogin() {
     document.getElementById('tela-login').classList.remove('d-none');
     document.getElementById('tela-app').classList.add('d-none');
@@ -34,14 +29,12 @@ function mostrarLogin() {
 function mostrarApp() {
     document.getElementById('tela-login').classList.add('d-none');
     document.getElementById('tela-app').classList.remove('d-none');
-    // Carrega os dados ao entrar
     loadIngredients();
     loadRecipes();
     loadOperationalCosts();
     loadSales();
 }
 
-// --- LÓGICA DE AUTENTICAÇÃO ---
 document.getElementById('form-login').addEventListener('submit', async (e) => {
     e.preventDefault();
     const username = document.getElementById('login-user').value;
@@ -55,7 +48,6 @@ document.getElementById('form-login').addEventListener('submit', async (e) => {
 
     if (res.ok) {
         mostrarApp();
-        // Limpa campos de senha
         document.getElementById('login-pass').value = '';
     } else {
         const data = await res.json();
@@ -89,14 +81,9 @@ async function logout() {
     mostrarLogin();
 }
 
-// =====================================================
-// === DAQUI PARA BAIXO É A LÓGICA DO SISTEMA EM SI ===
-// =====================================================
-
-// --- INGREDIENTES ---
 async function loadIngredients() {
     const res = await fetch(`${API_URL}/ingredients`);
-    if(!res.ok) return; // Se der erro (ex: deslogou), para
+    if(!res.ok) return; 
     const data = await res.json();
     
     const tbody = document.getElementById('tabela-ingredientes');
@@ -106,7 +93,6 @@ async function loadIngredients() {
     selectRec.innerHTML = '<option value="">Selecione...</option>';
 
     data.forEach(ing => {
-        // Tabela
         tbody.innerHTML += `
             <tr>
                 <td>${ing.name}</td>
@@ -115,7 +101,6 @@ async function loadIngredients() {
                 <td><button class="btn btn-sm btn-danger" onclick="deleteIngredient(${ing.id})">Excluir</button></td>
             </tr>
         `;
-        // Select da Receita
         selectRec.innerHTML += `<option value="${ing.id}" data-cost="${ing.cost}" data-name="${ing.name}" data-unit="${ing.unit}">${ing.name}</option>`;
     });
 }
@@ -143,7 +128,6 @@ async function deleteIngredient(id) {
     }
 }
 
-// --- RECEITAS ---
 function addIngToRecipeList() {
     const select = document.getElementById('rec-select-ing');
     const qty = parseFloat(document.getElementById('rec-qtd-ing').value);
@@ -208,7 +192,6 @@ async function salvarReceita() {
         body: JSON.stringify(payload)
     });
 
-    // Reset
     tempIngredients = [];
     tempFixedCosts = [];
     renderTempRecipeLists();
@@ -265,7 +248,6 @@ async function deleteRecipe(e, id) {
     }
 }
 
-// --- CUSTOS OPERACIONAIS ---
 document.getElementById('form-custo-op').addEventListener('submit', async (e) => {
     e.preventDefault();
     const payload = {
@@ -304,7 +286,6 @@ async function deleteOpCost(id) {
     }
 }
 
-// --- VENDAS ---
 async function registrarVenda() {
     const recId = parseInt(document.getElementById('venda-receita').value);
     const qtd = parseFloat(document.getElementById('venda-qtd').value);
@@ -363,7 +344,6 @@ async function loadSales() {
     `).join('');
 }
 
-// --- RELATÓRIOS ---
 async function gerarRelatorio() {
     const start = document.getElementById('rel-inicio').value;
     const end = document.getElementById('rel-fim').value;
@@ -399,3 +379,4 @@ async function gerarRelatorio() {
     document.getElementById('relatorio-texto').innerText = texto;
 
 }
+
